@@ -4,3 +4,16 @@ dist-ssr
 *.local
 .DS_Store
 .vite
+
+.vercel
+
+# Capacitor / Android build artifacts
+android/.gradle
+android/build
+android/app/build
+android/capacitor-cordova-android-plugins/build
+android/local.properties
+android/.idea
+android/app/release
+*.apk
+shots

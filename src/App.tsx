@@ -26,6 +26,8 @@ import { ChatTab } from "./pages/ChatTab.js";
 import { ScoreTab } from "./pages/ScoreTab.js";
 import { SecurityTab, type SecurityEvent } from "./pages/SecurityTab.js";
 import { ProfileTab } from "./pages/ProfileTab.js";
+import { SplashScreen } from "./pages/SplashScreen.js";
+import { LoginScreen } from "./pages/LoginScreen.js";
 import { Notif as BottomNavBell } from "./components/Icons.js";
 
 type Detail = null | "score" | "security" | "profile";
@@ -76,11 +78,17 @@ export default function App() {
     return null;
   });
   const [loaded, setLoaded] = useState(false);
+  const [phase, setPhase] = useState<"splash" | "login" | "app">(() => {
+    const s = new URLSearchParams(window.location.search).get("screen");
+    return s === "login" || s === "app" || s === "splash" ? s : "splash";
+  });
 
   useEffect(() => {
     const t = window.setTimeout(() => setLoaded(true), 750);
     return () => window.clearTimeout(t);
   }, []);
+
+  const isAuthed = () => localStorage.getItem("eco_authed") === "true";
 
   function flash(msg: string) {
     setToast(msg);
@@ -120,6 +128,26 @@ export default function App() {
 
   const openTransfer = () => setTransferOpen(true);
   const comingSoon = (title: string, Icon: Icon) => setSoon({ title, Icon });
+
+  if (phase === "splash") {
+    return (
+      <div className="mx-auto min-h-full w-full max-w-[430px]">
+        <SplashScreen onDone={() => setPhase(isAuthed() ? "app" : "login")} />
+      </div>
+    );
+  }
+  if (phase === "login") {
+    return (
+      <div className="ambient mx-auto min-h-full w-full max-w-[430px]">
+        <LoginScreen
+          onLogin={() => {
+            localStorage.setItem("eco_authed", "true");
+            setPhase("app");
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="ambient relative mx-auto min-h-full w-full max-w-[430px]">
