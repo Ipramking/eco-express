@@ -1,0 +1,241 @@
+import { useEffect, useMemo, useState } from "react";
+import type { Icon } from "@phosphor-icons/react";
+import {
+  amara,
+  fraudTxn,
+  AS_OF,
+  buildFingerprint,
+  computeBehaviourScore,
+  evaluate,
+  naira,
+  type Transaction,
+  type DeviationResult,
+} from "./core/index.js";
+import { BottomNav, type TabKey } from "./components/BottomNav.js";
+import { TabScaffold } from "./components/TabScaffold.js";
+import { ComingSoon } from "./components/ComingSoon.js";
+import { SentryInterrupt } from "./components/SentryInterrupt.js";
+import { SentryResult, type ResultKind } from "./components/SentryResult.js";
+import { TransferFlow } from "./components/TransferFlow.js";
+import { HomeSkeleton } from "./components/Skeleton.js";
+import { HomeTab } from "./pages/HomeTab.js";
+import { DashboardTab } from "./pages/DashboardTab.js";
+import { TransactTab } from "./pages/TransactTab.js";
+import { ServicesTab } from "./pages/ServicesTab.js";
+import { ChatTab } from "./pages/ChatTab.js";
+import { ScoreTab } from "./pages/ScoreTab.js";
+import { SecurityTab, type SecurityEvent } from "./pages/SecurityTab.js";
+import { ProfileTab } from "./pages/ProfileTab.js";
+import { Notif as BottomNavBell } from "./components/Icons.js";
+
+type Detail = null | "score" | "security" | "profile";
+
+const SEED_LOG: SecurityEvent[] = [
+  {
+    id: "seed-1",
+    ts: "2026-08-30T14:20:00.000Z",
+    title: "Sent ₦3,000",
+    detail: "To MTN Airtime. Matched your usual pattern.",
+    status: "allowed",
+  },
+  {
+    id: "seed-2",
+    ts: "2026-08-22T21:05:00.000Z",
+    title: "Held ₦52,000",
+    detail: "New recipient at an unusual time. You confirmed by SMS.",
+    status: "held",
+  },
+];
+
+export default function App() {
+  const fingerprint = useMemo(() => buildFingerprint(amara), []);
+  const score = useMemo(() => computeBehaviourScore(amara, AS_OF), []);
+
+  const [tab, setTab] = useState<TabKey>(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    return (["home", "dashboard", "chat", "transact", "services"] as TabKey[]).includes(t as TabKey)
+      ? (t as TabKey)
+      : "home";
+  });
+  const [detail, setDetail] = useState<Detail>(null);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [soon, setSoon] = useState<{ title: string; Icon: Icon } | null>(null);
+  const [pending, setPending] = useState<{ txn: Transaction; result: DeviationResult } | null>(() => {
+    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("sentry")) {
+      return { txn: fraudTxn, result: evaluate(fraudTxn, buildFingerprint(amara)) };
+    }
+    return null;
+  });
+  const [toast, setToast] = useState<string | null>(null);
+  const [log, setLog] = useState<SecurityEvent[]>(SEED_LOG);
+  const [outcome, setOutcome] = useState<{ kind: ResultKind; txn: Transaction; result: DeviationResult } | null>(() => {
+    const r = new URLSearchParams(window.location.search).get("result");
+    if (r === "proceed" || r === "unsure" || r === "cancel") {
+      return { kind: r, txn: fraudTxn, result: evaluate(fraudTxn, buildFingerprint(amara)) };
+    }
+    return null;
+  });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const t = window.setTimeout(() => setLoaded(true), 750);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  function flash(msg: string) {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2600);
+  }
+  function logEvent(e: Omit<SecurityEvent, "id" | "ts">) {
+    setLog((prev) => [{ ...e, id: `evt-${Date.now()}`, ts: new Date().toISOString() }, ...prev]);
+  }
+  function attempt(txn: Transaction) {
+    const result = evaluate(txn, fingerprint);
+    if (result.flagged) setPending({ txn, result });
+    else {
+      flash(`Sent ${naira(txn.amountKobo)} to ${txn.counterpartyName}`);
+      logEvent({ title: `Sent ${naira(txn.amountKobo)}`, detail: `To ${txn.counterpartyName}. Matched your usual pattern.`, status: "allowed" });
+    }
+  }
+  function resolve(kind: ResultKind) {
+    if (!pending) return;
+    const { txn, result } = pending;
+    const amount = naira(txn.amountKobo);
+    if (kind === "proceed") {
+      logEvent({ title: `Confirmed ${amount}`, detail: `To ${txn.counterpartyName}. You approved this transfer.`, status: "allowed" });
+    } else if (kind === "cancel") {
+      logEvent({ title: `Blocked ${amount}`, detail: result.reasons[0]?.detail ?? "Unusual transfer stopped.", status: "blocked" });
+    } else {
+      logEvent({ title: `Held ${amount}`, detail: "Waiting for your confirmation by SMS.", status: "held" });
+    }
+    setOutcome({ kind, txn, result });
+    setPending(null);
+  }
+
+  function closeOutcome(msg?: string) {
+    setOutcome(null);
+    setTab("home");
+    if (msg) flash(msg);
+  }
+
+  const openTransfer = () => setTransferOpen(true);
+  const comingSoon = (title: string, Icon: Icon) => setSoon({ title, Icon });
+
+  return (
+    <div className="ambient relative mx-auto min-h-full w-full max-w-[430px]">
+      {detail === "score" && <ScoreTab score={score} onBack={() => setDetail(null)} />}
+      {detail === "security" && (
+        <SecurityTab fingerprint={fingerprint} log={log} onTest={() => attempt(fraudTxn)} onBack={() => setDetail(null)} />
+      )}
+      {detail === "profile" && <ProfileTab score={score} onBack={() => setDetail(null)} />}
+
+      {!detail && (
+        <>
+          <div key={tab} className="pb-28">
+            {tab === "home" &&
+              (loaded ? (
+                <TabScaffold onProfile={() => setDetail("profile")} onNotifications={() => comingSoon("Notifications", BottomNavBell)}>
+                  <HomeTab
+                    score={score}
+                    onTransfer={openTransfer}
+                    onGoScore={() => setDetail("score")}
+                    onComingSoon={comingSoon}
+                  />
+                </TabScaffold>
+              ) : (
+                <HomeSkeleton />
+              ))}
+
+            {tab === "dashboard" && (
+              <TabScaffold onProfile={() => setDetail("profile")} onNotifications={() => comingSoon("Notifications", BottomNavBell)}>
+                <DashboardTab score={score} onGoScore={() => setDetail("score")} onComingSoon={comingSoon} />
+              </TabScaffold>
+            )}
+
+            {tab === "transact" && (
+              <TabScaffold onProfile={() => setDetail("profile")} onNotifications={() => comingSoon("Notifications", BottomNavBell)}>
+                <TransactTab onTransfer={openTransfer} onComingSoon={comingSoon} />
+              </TabScaffold>
+            )}
+
+            {tab === "services" && (
+              <TabScaffold onProfile={() => setDetail("profile")} onNotifications={() => comingSoon("Notifications", BottomNavBell)}>
+                <ServicesTab
+                  onGoScore={() => setDetail("score")}
+                  onGoSecurity={() => setDetail("security")}
+                  onComingSoon={comingSoon}
+                />
+              </TabScaffold>
+            )}
+
+            {tab === "chat" && (
+              <ChatTab
+                onGoScore={() => setDetail("score")}
+                onGoSecurity={() => setDetail("security")}
+                onTransfer={openTransfer}
+              />
+            )}
+          </div>
+
+          <BottomNav active={tab} onChange={setTab} />
+        </>
+      )}
+
+      {transferOpen && (
+        <TransferFlow
+          onClose={() => setTransferOpen(false)}
+          onSubmit={(t) => {
+            setTransferOpen(false);
+            attempt(t);
+          }}
+        />
+      )}
+
+      {pending && (
+        <SentryInterrupt
+          txn={pending.txn}
+          result={pending.result}
+          onProceed={() => resolve("proceed")}
+          onCancel={() => resolve("cancel")}
+          onUnsure={() => resolve("unsure")}
+        />
+      )}
+
+      {outcome && (
+        <SentryResult
+          kind={outcome.kind}
+          txn={outcome.txn}
+          result={outcome.result}
+          onPrimary={() => {
+            if (outcome.kind === "cancel") {
+              setOutcome(null);
+              setDetail("security");
+            } else if (outcome.kind === "unsure") {
+              closeOutcome("Confirmation code sent to ****4097.");
+            } else {
+              closeOutcome();
+            }
+          }}
+          onSecondary={() => {
+            if (outcome.kind === "proceed") {
+              setOutcome(null);
+              setDetail("security");
+            } else if (outcome.kind === "unsure") {
+              closeOutcome("Transfer cancelled. Your money stays put.");
+            } else {
+              closeOutcome();
+            }
+          }}
+        />
+      )}
+
+      {soon && <ComingSoon title={soon.title} Icon={soon.Icon} onClose={() => setSoon(null)} />}
+
+      {toast && (
+        <div className="fixed inset-x-0 bottom-24 z-[55] mx-auto w-[92%] max-w-[400px] animate-pop rounded-ctrl bg-eco-blue px-4 py-3 text-center text-sm font-semibold text-white shadow-card">
+          {toast}
+        </div>
+      )}
+    </div>
+  );
+}

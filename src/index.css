@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Eco Express design system.
+ * Grounded in the real Ecobank app: deep Ecobank blue + signature gold, with
+ * the logo green as a tertiary/positive accent. Blue+gold is the premium
+ * banking combination. Light is default (their app is blue-on-white); dark is
+ * a first-class option. Every value is a token so the whole app re-skins from
+ * this one block.
+ */
+:root {
+  --eco-blue: 0 89 124;        /* #00597C Orient/Venice - primary anchor (60-70%) */
+  --eco-blue-deep: 11 57 84;   /* #0B3954 footers, active states, dark cards */
+  --eco-blue-bright: 0 122 165;/* #007AA5 gradient energy */
+  --eco-gold: 217 160 39;      /* #D9A027 occasional campaign accent */
+  --eco-gold-hi: 233 181 74;   /* lighter gold for the metallic chip */
+  --eco-green: 162 197 35;     /* #A2C523 lime accent - lines/fills-with-dark-text only */
+  --eco-accent: 162 197 35;    /* alias -> green (ring arc, accent lines) */
+  --eco-cyan: 0 89 124;        /* interactive accent = blue on light (green fails on white) */
+
+  --bg: 244 246 248;           /* #F4F6F8 soft gray */
+  --surface: 255 255 255;
+  --surface2: 234 236 238;     /* #EAECEE light card fill */
+  --hairline: 222 227 231;
+  --ink: 32 33 36;             /* #202124 charcoal */
+  --ink-soft: 90 100 110;
+  --ink-faint: 128 140 152;
+
+  --positive: 46 139 87;       /* readable green for money (lime fails as text) */
+  --warn: 176 120 20;
+  --danger: 200 62 55;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --eco-cyan: 96 178 214;    /* light blue reads on teal-navy */
+    --bg: 8 30 43;             /* #081E2B deep teal-navy */
+    --surface: 13 44 60;
+    --surface2: 19 55 74;
+    --hairline: 33 66 88;
+    --ink: 236 242 246;
+    --ink-soft: 168 190 202;
+    --ink-faint: 120 148 164;
+    --positive: 120 196 140;
+    --warn: 226 176 74;
+    --danger: 228 110 102;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --eco-cyan: 96 178 214;
+  --bg: 8 30 43;
+  --surface: 13 44 60;
+  --surface2: 19 55 74;
+  --hairline: 33 66 88;
+  --ink: 236 242 246;
+  --ink-soft: 168 190 202;
+  --ink-faint: 120 148 164;
+  --positive: 120 196 140;
+  --warn: 226 176 74;
+  --danger: 228 110 102;
+  color-scheme: dark;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  scrollbar-width: none;
+}
+::-webkit-scrollbar { width: 0; height: 0; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: rgb(var(--bg));
+  color: rgb(var(--ink));
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+@layer components {
+  .card {
+    @apply rounded-card border border-hairline bg-surface shadow-card;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-ctrl bg-eco-blue font-semibold text-white transition-transform duration-150 active:scale-[0.97];
+    box-shadow: 0 10px 24px -12px rgb(var(--eco-blue) / 0.8);
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-ctrl font-bold text-eco-blue-deep transition-transform duration-150 active:scale-[0.97];
+    background: linear-gradient(135deg, rgb(var(--eco-gold-hi)), rgb(var(--eco-gold)));
+    box-shadow: 0 10px 24px -12px rgb(var(--eco-gold) / 0.9);
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-ctrl border border-hairline bg-surface text-ink-soft transition-transform duration-150 active:scale-[0.97];
+  }
+  .label-micro {
+    @apply text-[11px] font-bold uppercase tracking-[0.14em] text-ink-faint;
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Premium hero card: navy depth into brand blue, with a warm gold horizon. */
+  .brand-card {
+    background:
+      radial-gradient(120% 90% at 100% 0%, rgb(var(--eco-green) / 0.22) 0%, transparent 48%),
+      linear-gradient(150deg, rgb(var(--eco-blue-deep)) 0%, rgb(var(--eco-blue)) 58%, rgb(var(--eco-blue-bright)) 120%);
+  }
+  .shadow-card {
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.5) inset, 0 10px 30px -20px rgb(var(--eco-blue) / 0.55);
+  }
+  :root[data-theme="dark"] .shadow-card,
+  :root:not([data-theme="light"]) .shadow-card {
+    box-shadow: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 16px 40px -24px rgb(0 0 0 / 0.9);
+  }
+
+  /* Frosted glass, used on floating nav. Solid fallback for reduced-transparency. */
+  .glass {
+    background: rgb(var(--surface) / 0.72);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass { background: rgb(var(--surface)); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  }
+}
+
+@layer utilities {
+  .ambient {
+    background:
+      radial-gradient(70% 40% at 50% -8%, rgb(var(--eco-blue) / 0.14) 0%, transparent 68%),
+      radial-gradient(50% 26% at 100% 4%, rgb(var(--eco-gold) / 0.10) 0%, transparent 60%);
+  }
+  .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.5rem); }
+  .pt-safe { padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem); }
+  .text-gradient-gold {
+    background: linear-gradient(120deg, rgb(var(--eco-gold-hi)), rgb(var(--eco-gold)));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+}
+
+/* motion */
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes pop  { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+@keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.animate-rise { animation: rise 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-pop  { animation: pop 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* stagger helpers for entrance choreography */
+.stagger > * { animation: rise 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.stagger > *:nth-child(1){animation-delay:.02s}
+.stagger > *:nth-child(2){animation-delay:.07s}
+.stagger > *:nth-child(3){animation-delay:.12s}
+.stagger > *:nth-child(4){animation-delay:.17s}
+.stagger > *:nth-child(5){animation-delay:.22s}
+.stagger > *:nth-child(6){animation-delay:.27s}
+.stagger > *:nth-child(7){animation-delay:.32s}
+
+.skeleton {
+  position: relative; overflow: hidden;
+  background: rgb(var(--surface2));
+}
+.skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(var(--ink) / 0.06), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise, .animate-pop, .animate-ping, .stagger > *,
+  .skeleton::after, [class*="animate-"] { animation: none !important; }
+  .stagger > * { opacity: 1 !important; transform: none !important; }
+}
