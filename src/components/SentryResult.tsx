@@ -1,12 +1,15 @@
 import { naira, type DeviationResult, type Transaction } from "../core/index.js";
-import { CheckOk, ClockIcon, LockIcon, ShieldCheck, Home } from "./Icons.js";
+import { ClockIcon, LockIcon, ShieldCheck } from "./Icons.js";
 
-export type ResultKind = "proceed" | "unsure" | "cancel";
+export type ResultKind = "unsure" | "cancel";
 
 /**
- * The SentryAI outcome screen. Every resolution of the interrupt lands on its
- * own detailed result: what happened, the transaction facts, and the right
- * next step. This is what a judge sees after each demo choice.
+ * The SentryAI non-release outcomes: hold (pending SMS confirmation) or block
+ * (transfer stopped, transfers locked). A successful, released transfer -
+ * whether a routine PIN send or a flagged transfer cleared by a face scan -
+ * is not handled here; it goes to the unified TransactionReceipt instead, so
+ * every completed payment looks the same regardless of which path got it
+ * there.
  */
 function reference(txn: Transaction): string {
   const n = [...txn.id].reduce((a, c) => a + c.charCodeAt(0), 0) * 977;
@@ -24,7 +27,7 @@ const nowStamp = () =>
 
 interface Variant {
   tone: string; // rgb var name
-  Icon: typeof CheckOk;
+  Icon: typeof ClockIcon;
   eyebrow: string;
   title: string;
   lead: string;
@@ -53,31 +56,6 @@ export function SentryResult({
   const stamp = nowStamp();
 
   const V: Record<ResultKind, Variant> = {
-    proceed: {
-      tone: "--positive",
-      Icon: CheckOk,
-      eyebrow: "Transfer approved",
-      title: "Your money is on the way",
-      lead: `Your face scan confirmed it was you, so SentryAI released it. ${amount} is being sent to ${txn.counterpartyName}.`,
-      statusLabel: "Sent",
-      facts: [
-        { k: "Amount", v: amount },
-        { k: "Recipient", v: txn.counterpartyName },
-        { k: "Verified by", v: "Face scan" },
-        { k: "Reference", v: ref },
-        { k: "Date", v: stamp },
-      ],
-      section: {
-        heading: "What happens now",
-        items: [
-          { title: "Funds released", body: "The transfer left your Blaze account immediately after your face scan was verified." },
-          { title: "Recorded for you", body: "This verification is saved to your SentryAI activity so you have a full trail." },
-          { title: "Your pattern learns", body: "SentryAI notes that this recipient and amount were approved by you." },
-        ],
-      },
-      primary: "Done",
-      secondary: "View security activity",
-    },
     unsure: {
       tone: "--warn",
       Icon: ClockIcon,
@@ -197,7 +175,6 @@ export function SentryResult({
         {/* actions */}
         <div className="mt-auto space-y-2.5 pt-7">
           <button onClick={onPrimary} className="btn-primary w-full py-3.5 text-sm">
-            {kind === "proceed" && <Home size={16} weight="fill" />}
             {v.primary}
           </button>
           {v.secondary && (

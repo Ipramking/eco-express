@@ -16,4 +16,7 @@ android/local.properties
 android/.idea
 android/app/release
 *.apk
+# The distributable build served from the landing page's QR/download link -
+# intentionally committed so it deploys with the site.
+!public/downloads/eco-express.apk
 shots

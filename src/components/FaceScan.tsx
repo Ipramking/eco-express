@@ -16,6 +16,12 @@ const VERIFIED_HOLD_MS = 650;
  * Opportunistically shows the live front camera for realism when the
  * environment grants it; degrades to an animated viewfinder with no visible
  * error when it does not, so the flow never breaks the demo.
+ *
+ * Same rule as SentryInterrupt: this is a permanently-dark surface, so every
+ * colour comes from the theme-invariant "ondark-*" tokens, never the
+ * theme-flipping --eco-cyan/--positive. In light mode (the app default)
+ * --eco-cyan resolves to the same deep blue as the backdrop itself - a ring
+ * drawn in that colour nearly disappears against its own background.
  */
 export function FaceScan({
   txn,
@@ -70,25 +76,25 @@ export function FaceScan({
   const verified = stage === "verified";
 
   return (
-    <div className="fixed inset-0 z-[75] overflow-y-auto bg-eco-blue-deep/95 backdrop-blur-md">
+    <div className="fixed inset-0 z-[75] overflow-y-auto bg-eco-blue-deep">
       <div className="mx-auto flex min-h-full w-full max-w-[430px] flex-col px-6 pb-8 pt-10">
         <div className="flex items-center justify-between">
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/60">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-ondark-ink-soft">
             SentryAI &middot; identity check
           </p>
           <button
             onClick={onCancel}
-            className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white/80"
+            className="grid h-10 w-10 place-items-center rounded-full bg-white/[0.1] text-ondark-ink"
             aria-label="Cancel verification"
           >
             <Close size={14} />
           </button>
         </div>
 
-        <div className="mt-2 text-center">
-          <p className="text-sm text-white/70">Confirming it's you before releasing</p>
-          <p className="tabular text-lg font-bold text-white">
-            {naira(txn.amountKobo)} <span className="font-normal text-white/60">to {txn.counterpartyName}</span>
+        <div className="mt-3 text-center">
+          <p className="text-sm text-ondark-ink-soft">Confirming it's you before releasing</p>
+          <p className="tabular text-lg font-bold text-ondark-ink">
+            {naira(txn.amountKobo)} <span className="font-normal text-ondark-ink-soft">to {txn.counterpartyName}</span>
           </p>
         </div>
 
@@ -101,35 +107,29 @@ export function FaceScan({
               cy="50"
               r="47"
               fill="none"
-              stroke={verified ? "rgb(var(--positive))" : "rgb(var(--eco-cyan))"}
-              strokeWidth="2.5"
+              stroke={verified ? "rgb(var(--ondark-positive))" : "rgb(var(--ondark-cyan))"}
+              strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray="18 10"
-              opacity="0.85"
             />
           </svg>
 
-          <div className="absolute inset-[10px] overflow-hidden rounded-full border-2 border-white/15 bg-black/30">
+          <div className="absolute inset-[10px] overflow-hidden rounded-full border-2 border-white/25 bg-black/40">
             {hasCamera ? (
-              <video
-                ref={videoRef}
-                muted
-                playsInline
-                className="h-full w-full scale-x-[-1] object-cover"
-              />
+              <video ref={videoRef} muted playsInline className="h-full w-full scale-x-[-1] object-cover" />
             ) : (
               <div className="flex h-full w-full items-center justify-center">
-                <FaceScanIcon size={72} weight="light" className="text-white/50" />
+                <FaceScanIcon size={72} weight="light" className="text-ondark-ink-soft" />
               </div>
             )}
 
             {!verified && (
-              <div className="animate-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-eco-cyan/60 to-transparent" />
+              <div className="animate-scanline pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-transparent via-ondark-cyan/70 to-transparent" />
             )}
 
             {verified && (
-              <div className="animate-pop absolute inset-0 flex items-center justify-center bg-positive/25">
-                <span className="grid h-16 w-16 place-items-center rounded-full bg-positive text-white">
+              <div className="animate-pop absolute inset-0 flex items-center justify-center bg-ondark-positive/30">
+                <span className="grid h-16 w-16 place-items-center rounded-full bg-ondark-positive text-eco-blue-deep">
                   <CheckOk size={32} weight="fill" />
                 </span>
               </div>
@@ -137,19 +137,16 @@ export function FaceScan({
           </div>
         </div>
 
-        <p className="animate-rise mt-8 text-center text-base font-bold text-white">
+        <p className="animate-rise mt-8 text-center text-base font-bold text-ondark-ink">
           {verified ? "Face verified" : "Hold still, scanning your face"}
         </p>
-        <p className="mt-1.5 text-center text-xs leading-relaxed text-white/60">
+        <p className="mt-1.5 text-center text-xs leading-relaxed text-ondark-ink-soft">
           {verified
             ? "Releasing your transfer now."
             : "This confirms the account owner is present. No one else can approve this transfer for you."}
         </p>
 
-        <button
-          onClick={onCancel}
-          className="mt-auto py-4 text-center text-sm font-semibold text-white/60"
-        >
+        <button onClick={onCancel} className="mt-auto py-4 text-center text-sm font-bold text-ondark-ink-soft">
           Cancel
         </button>
       </div>

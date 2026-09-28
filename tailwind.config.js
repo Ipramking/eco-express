@@ -27,6 +27,15 @@ export default {
         positive: "rgb(var(--positive) / <alpha-value>)",
         warn: "rgb(var(--warn) / <alpha-value>)",
         danger: "rgb(var(--danger) / <alpha-value>)",
+        ondark: {
+          danger: "rgb(var(--ondark-danger) / <alpha-value>)",
+          positive: "rgb(var(--ondark-positive) / <alpha-value>)",
+          warn: "rgb(var(--ondark-warn) / <alpha-value>)",
+          cyan: "rgb(var(--ondark-cyan) / <alpha-value>)",
+          ink: "rgb(var(--ondark-ink) / <alpha-value>)",
+          "ink-soft": "rgb(var(--ondark-ink-soft) / <alpha-value>)",
+          "ink-faint": "rgb(var(--ondark-ink-faint) / <alpha-value>)",
+        },
       },
       borderRadius: {
         card: "18px",

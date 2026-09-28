@@ -32,6 +32,20 @@
   --warn: 176 120 20;
   --danger: 200 62 55;
 
+  /*
+   * "On-dark" set: theme-INVARIANT, tuned bright for permanently-dark
+   * surfaces (SentryInterrupt, FaceScan). --danger/--positive/--eco-cyan
+   * flip with the app theme, so in light mode (the default) they resolve to
+   * darker, low-contrast values on a dark backdrop. These never change.
+   */
+  --ondark-danger: 255 120 108;
+  --ondark-positive: 116 219 160;
+  --ondark-warn: 250 195 92;
+  --ondark-cyan: 122 202 238;
+  --ondark-ink: 244 248 251;
+  --ondark-ink-soft: 205 219 230;
+  --ondark-ink-faint: 158 179 197;
+
   color-scheme: light;
 }
 

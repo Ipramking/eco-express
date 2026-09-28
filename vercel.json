@@ -2,5 +2,8 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "redirects": [
+    { "source": "/download", "destination": "/downloads/eco-express.apk", "permanent": false }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
