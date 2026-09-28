@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import type { Icon } from "@phosphor-icons/react";
 import {
   amara,
@@ -100,7 +101,11 @@ export default function App() {
   const [phase, setPhase] = useState<Phase>(() => {
     const s = new URLSearchParams(window.location.search).get("screen");
     if (s === "login" || s === "app" || s === "splash" || s === "landing") return s;
-    return "landing";
+    // The "landing" gateway (Use Web App / Get Android App) is for people
+    // arriving at the website. Someone opening the installed Android app has
+    // already made that choice - show it there and they'd be asked whether
+    // to install the app they're already running. Skip straight to splash.
+    return Capacitor.isNativePlatform() ? "splash" : "landing";
   });
 
   useEffect(() => {
