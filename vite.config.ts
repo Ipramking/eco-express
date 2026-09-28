@@ -2,8 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-// Eco Express ships as an installable PWA. No landing page: the app opens
-// straight to the Blaze home screen.
+// Eco Express ships as an installable PWA, gated behind a landing screen that
+// offers the web app or the Android APK.
 export default defineConfig({
   plugins: [
     react(),
@@ -14,8 +14,8 @@ export default defineConfig({
         name: "Eco Express",
         short_name: "Eco Express",
         description: "Your Blaze account, made intelligent.",
-        theme_color: "#00539B",
-        background_color: "#061523",
+        theme_color: "#00597C",
+        background_color: "#0B3954",
         display: "standalone",
         orientation: "portrait",
         start_url: "/",
