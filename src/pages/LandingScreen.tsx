@@ -84,7 +84,11 @@ export function LandingScreen({ onUseWebApp }: { onUseWebApp: () => void }) {
             <p className="mt-1 text-xs leading-relaxed text-ink-soft">
               Point your phone's camera at the code, or use the button below.
             </p>
-            <a href={DOWNLOAD_PATH} className="btn-primary mt-3 w-full gap-1.5 py-3 text-sm sm:w-auto sm:px-6">
+            <a
+              href={DOWNLOAD_PATH}
+              download="eco-express.apk"
+              className="btn-primary mt-3 w-full gap-1.5 py-3 text-sm sm:w-auto sm:px-6"
+            >
               Download APK <ArrowRt size={14} weight="bold" />
             </a>
           </div>

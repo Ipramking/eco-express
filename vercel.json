@@ -2,8 +2,17 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "redirects": [
-    { "source": "/download", "destination": "/downloads/eco-express.apk", "permanent": false }
+  "headers": [
+    {
+      "source": "/downloads/eco-express.apk",
+      "headers": [
+        { "key": "Content-Disposition", "value": "attachment; filename=\"eco-express.apk\"" },
+        { "key": "Content-Type", "value": "application/vnd.android.package-archive" }
+      ]
+    }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "rewrites": [
+    { "source": "/download", "destination": "/downloads/eco-express.apk" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
