@@ -54,4 +54,6 @@ declare module "@phosphor-icons/react" {
   export const Warning: Icon;
   export const ArrowUp: Icon;
   export const ArrowDown: Icon;
+  export const ScanSmiley: Icon;
+  export const Fingerprint: Icon;
 }

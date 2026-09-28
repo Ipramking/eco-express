@@ -15,6 +15,7 @@ import { BottomNav, type TabKey } from "./components/BottomNav.js";
 import { TabScaffold } from "./components/TabScaffold.js";
 import { ComingSoon } from "./components/ComingSoon.js";
 import { SentryInterrupt } from "./components/SentryInterrupt.js";
+import { FaceScan } from "./components/FaceScan.js";
 import { SentryResult, type ResultKind } from "./components/SentryResult.js";
 import { TransferFlow } from "./components/TransferFlow.js";
 import { HomeSkeleton } from "./components/Skeleton.js";
@@ -63,11 +64,15 @@ export default function App() {
   const [transferOpen, setTransferOpen] = useState(false);
   const [soon, setSoon] = useState<{ title: string; Icon: Icon } | null>(null);
   const [pending, setPending] = useState<{ txn: Transaction; result: DeviationResult } | null>(() => {
-    if (typeof window !== "undefined" && new URLSearchParams(window.location.search).has("sentry")) {
+    const p = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+    if (p?.has("sentry") || p?.has("facescan")) {
       return { txn: fraudTxn, result: evaluate(fraudTxn, buildFingerprint(amara)) };
     }
     return null;
   });
+  const [scanning, setScanning] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).has("facescan")
+  );
   const [toast, setToast] = useState<string | null>(null);
   const [log, setLog] = useState<SecurityEvent[]>(SEED_LOG);
   const [outcome, setOutcome] = useState<{ kind: ResultKind; txn: Transaction; result: DeviationResult } | null>(() => {
@@ -110,7 +115,7 @@ export default function App() {
     const { txn, result } = pending;
     const amount = naira(txn.amountKobo);
     if (kind === "proceed") {
-      logEvent({ title: `Confirmed ${amount}`, detail: `To ${txn.counterpartyName}. You approved this transfer.`, status: "allowed" });
+      logEvent({ title: `Confirmed ${amount}`, detail: `To ${txn.counterpartyName}. Verified with a face scan.`, status: "allowed" });
     } else if (kind === "cancel") {
       logEvent({ title: `Blocked ${amount}`, detail: result.reasons[0]?.detail ?? "Unusual transfer stopped.", status: "blocked" });
     } else {
@@ -223,9 +228,20 @@ export default function App() {
         <SentryInterrupt
           txn={pending.txn}
           result={pending.result}
-          onProceed={() => resolve("proceed")}
+          onVerify={() => setScanning(true)}
           onCancel={() => resolve("cancel")}
           onUnsure={() => resolve("unsure")}
+        />
+      )}
+
+      {pending && scanning && (
+        <FaceScan
+          txn={pending.txn}
+          onVerified={() => {
+            setScanning(false);
+            resolve("proceed");
+          }}
+          onCancel={() => setScanning(false)}
         />
       )}
 

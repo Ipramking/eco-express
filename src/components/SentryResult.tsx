@@ -58,19 +58,20 @@ export function SentryResult({
       Icon: CheckOk,
       eyebrow: "Transfer approved",
       title: "Your money is on the way",
-      lead: `You confirmed this transfer, so SentryAI released it. ${amount} is being sent to ${txn.counterpartyName}.`,
+      lead: `Your face scan confirmed it was you, so SentryAI released it. ${amount} is being sent to ${txn.counterpartyName}.`,
       statusLabel: "Sent",
       facts: [
         { k: "Amount", v: amount },
         { k: "Recipient", v: txn.counterpartyName },
+        { k: "Verified by", v: "Face scan" },
         { k: "Reference", v: ref },
         { k: "Date", v: stamp },
       ],
       section: {
         heading: "What happens now",
         items: [
-          { title: "Funds released", body: "The transfer left your Blaze account immediately after you confirmed." },
-          { title: "Recorded for you", body: "This confirmation is saved to your SentryAI activity so you have a full trail." },
+          { title: "Funds released", body: "The transfer left your Blaze account immediately after your face scan was verified." },
+          { title: "Recorded for you", body: "This verification is saved to your SentryAI activity so you have a full trail." },
           { title: "Your pattern learns", body: "SentryAI notes that this recipient and amount were approved by you." },
         ],
       },

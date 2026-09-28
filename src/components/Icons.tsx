@@ -34,6 +34,8 @@ import {
   Clock,
   LockKey,
   Copy,
+  ScanSmiley,
+  Fingerprint,
   Shield as PShield,
   ShieldCheck as PShieldCheck,
   Gauge as PGauge,
@@ -95,3 +97,5 @@ export const CheckOk: Icon = CheckCircle;
 export const ClockIcon: Icon = Clock;
 export const LockIcon: Icon = LockKey;
 export const CopyIcon: Icon = Copy;
+export const FaceScanIcon: Icon = ScanSmiley;
+export const FingerprintIcon: Icon = Fingerprint;

@@ -148,8 +148,12 @@ body {
 @keyframes pop  { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
 .animate-rise { animation: rise 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .animate-pop  { animation: pop 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-spin-slow { animation: spin-slow 2.4s linear infinite; }
+.animate-scanline { animation: scanline 1.6s ease-in-out infinite; }
 
 /* stagger helpers for entrance choreography */
 .stagger > * { animation: rise 0.5s cubic-bezier(0.16,1,0.3,1) both; }

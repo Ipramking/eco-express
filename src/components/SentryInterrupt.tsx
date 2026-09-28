@@ -1,5 +1,5 @@
 import { naira, type DeviationResult, type Transaction } from "../core/index.js";
-import { Alert } from "./Icons.js";
+import { Alert, FaceScanIcon } from "./Icons.js";
 
 /**
  * The SentryAI full-screen interrupt. This is the pitch centerpiece.
@@ -12,17 +12,23 @@ import { Alert } from "./Icons.js";
  * The overlay scrolls (overflow-y-auto) so it never traps content off-screen,
  * while a min-h-full inner column keeps the actions pinned to the bottom when
  * everything fits.
+ *
+ * There is deliberately no "Yes, I started this transfer" tap-to-confirm
+ * button. A scammer on a call can talk a victim through tapping a button;
+ * they cannot fake the victim's face. Releasing a flagged transfer requires a
+ * face scan (see FaceScan.tsx) - onVerify only opens that step, it never
+ * releases funds by itself.
  */
 export function SentryInterrupt({
   txn,
   result,
-  onProceed,
+  onVerify,
   onCancel,
   onUnsure,
 }: {
   txn: Transaction;
   result: DeviationResult;
-  onProceed: () => void;
+  onVerify: () => void;
   onCancel: () => void;
   onUnsure: () => void;
 }) {
@@ -68,13 +74,19 @@ export function SentryInterrupt({
         </div>
 
         {/* actions */}
-        <div className="mt-auto space-y-2.5 pt-7">
+        <div className="mt-auto pt-7">
           <button
-            onClick={onProceed}
-            className="w-full rounded-ctrl border border-white/25 bg-white/10 py-3.5 text-sm font-semibold text-white transition active:scale-[0.98]"
+            onClick={onVerify}
+            className="btn-primary w-full gap-2 py-3.5 text-sm"
           >
-            Yes, I started this transfer
+            <FaceScanIcon size={18} weight="fill" />
+            Verify with face scan
           </button>
+          <p className="mt-2 text-center text-[11px] leading-relaxed text-white/50">
+            We confirm it's really you before releasing money. A tap alone isn't enough.
+          </p>
+
+          <div className="mt-3 space-y-2.5">
           <button
             onClick={onUnsure}
             className="w-full rounded-ctrl border border-white/20 py-3.5 text-sm font-semibold text-white/75 transition active:scale-[0.98]"
@@ -87,6 +99,7 @@ export function SentryInterrupt({
           >
             No, cancel and lock transfers
           </button>
+          </div>
         </div>
       </div>
     </div>
